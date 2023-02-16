@@ -1,3 +1,5 @@
-fn main() {
-    println!("Hello, world!");
-}
+mod automata;
+mod state;
+mod symbol;
+
+fn main() {}
