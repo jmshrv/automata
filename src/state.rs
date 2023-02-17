@@ -1,11 +1,11 @@
 #[derive(Debug)]
-pub struct State {
-    name: String,
+pub struct State<T> {
+    name: T,
     is_final: bool,
 }
 
-impl State {
-    pub fn new(name: String, is_final: bool) -> State {
+impl<T> State<T> {
+    pub fn new(name: T, is_final: bool) -> State<T> {
         State { name, is_final }
     }
 

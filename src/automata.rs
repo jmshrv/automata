@@ -16,18 +16,18 @@ pub enum AutomataErr {
     InvalidTransitionCount(usize),
 }
 
-pub struct Automata<T> {
-    graph: Graph<State, T>,
+pub struct Automata<S, T> {
+    graph: Graph<State<S>, T>,
 }
 
-impl<T: PartialEq> Automata<T> {
-    pub fn new() -> Automata<T> {
+impl<S, T: PartialEq> Automata<S, T> {
+    pub fn new() -> Automata<S, T> {
         Automata {
             graph: Graph::new(),
         }
     }
 
-    pub fn add_state(&mut self, state: State) -> NodeIndex {
+    pub fn add_state(&mut self, state: State<S>) -> NodeIndex {
         self.graph.add_node(state)
     }
 
@@ -35,7 +35,7 @@ impl<T: PartialEq> Automata<T> {
         self.graph.add_edge(a, b, symbol)
     }
 
-    pub fn end_state<I>(&self, word: I) -> Result<(NodeIndex, &State), AutomataErr>
+    pub fn end_state<I>(&self, word: I) -> Result<(NodeIndex, &State<S>), AutomataErr>
     where
         I: IntoIterator<Item = T>,
     {
@@ -68,7 +68,7 @@ impl<T: PartialEq> Automata<T> {
         Ok(node)
     }
 
-    fn root(&self) -> Option<(NodeIndex, &State)> {
+    fn root(&self) -> Option<(NodeIndex, &State<S>)> {
         self.graph.node_references().next()
     }
 }
