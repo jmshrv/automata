@@ -1,6 +1,7 @@
 use petgraph::{
     graph::{EdgeIndex, NodeIndex},
-    Graph,
+    visit::{EdgeRef, IntoNodeReferences},
+    Direction, Graph,
 };
 use thiserror::Error;
 
@@ -34,28 +35,40 @@ impl<T: PartialEq> Automata<T> {
         self.graph.add_edge(a, b, symbol)
     }
 
-    pub fn is_in_language<I>(&self, word: I) -> Result<bool, AutomataErr>
+    pub fn end_state<I>(&self, word: I) -> Result<(NodeIndex, &State), AutomataErr>
     where
         I: IntoIterator<Item = T>,
     {
-        let head_index = self.root().ok_or(AutomataErr::NoNodes)?;
+        // Get the head of the automata, or return an error otherwise
+        let mut node = self.root().ok_or(AutomataErr::NoNodes)?;
 
         for token in word {
-            let valid_nodes: Vec<_> = self
+            let valid_edges: Vec<_> = self
                 .graph
-                .edges(head_index)
-                .filter(|edge| *edge.weight() == token)
+                .edges_directed(node.0, Direction::Outgoing)
+                .filter(|edge| {
+                    return *edge.weight() == token;
+                })
                 .collect();
 
-            if valid_nodes.len() != 1 {
-                return Err(AutomataErr::InvalidTransitionCount(valid_nodes.len()));
+            if valid_edges.len() != 1 {
+                return Err(AutomataErr::InvalidTransitionCount(valid_edges.len()));
             }
+
+            let edge_to_follow = valid_edges
+                .first()
+                .expect("No nodes despite just checking?");
+
+            node = (
+                edge_to_follow.target(),
+                &self.graph[edge_to_follow.target()],
+            );
         }
 
-        Ok(true)
+        Ok(node)
     }
 
-    fn root(&self) -> Option<NodeIndex> {
-        self.graph.node_indices().next()
+    fn root(&self) -> Option<(NodeIndex, &State)> {
+        self.graph.node_references().next()
     }
 }

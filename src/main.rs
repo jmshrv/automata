@@ -15,7 +15,9 @@ fn main() -> Result<()> {
     automata.add_transition(s1, s2, true);
     automata.add_transition(s1, s2, false);
 
-    automata.is_in_language([true])?;
+    let end_state = automata.end_state([true])?;
+
+    println!("{:?}", end_state.1);
 
     Ok(())
 }
